@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+data = pd.read_excel('titanic-passengers.csv')
+data = data.set_index('Name')
+data
+
+data.isnull().sum()
+
+data.drop('Cabin',axis='columns',inplace=True)
+data['Age'].fillna(data['Age'].mean(), inplace=True)
+
+listClass = []
+for i, row in data.iterrows():
+    print(row["Age"])
+    if row["Age"]>0 and row["Age"]<20:
+        listClass.append(0)
+    if row["Age"]>=20 and row["Age"]<40:
+        listClass.append(1)
+    if row["Age"]>=40 and row["Age"]<60:
+        listClass.append(2)
+    if row["Age"]>=60 :
+        listClass.append(3)    
+    
+listClass
+
+data["ageClass"] = listClass
+
+data.to_csv("Titanic_filltered")
+
+ax = sns.barplot(x="ageClass", y="Age", hue="Survived",
+                 data=data, dodge=True,estimator = np.mean)
+                 
+CorrMatrix = data.corr()
+CorrMatrix
+
+sns.heatmap(CorrMatrix, annot=True)
+plt.show()
+
+plt.xlabel("Sex")
+plt.ylabel("Age")
+vc=data["Sex"].value_counts()
+vc.plot.bar(rot=45)
+
+plt.xlabel("Sex")
+plt.ylabel("Age")
+vc=data["Sex"].value_counts()
+vc.plot.bar(rot=45)
+
+labels = list(data["Age"].unique())
+valuesS = data[data["Sex"]=="male"].value_counts()
+valuesNotS = data[data["Sex"]=="female"].value_counts()
+
+# Create subplots: use 'domain' type for Pie subplot
+fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]])
+fig.add_trace(go.Pie(labels=valuesS, values=labels, name="male"),
+              1, 1)
+fig.add_trace(go.Pie(labels=valuesNotS, values=labels, name="female"),
+              1, 2)
+fig.update_traces(hole=.3)
+
+fig.show()
